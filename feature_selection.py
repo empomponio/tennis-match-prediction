@@ -303,7 +303,7 @@ def create_train_test_csv(df, csv_path, csv_path_test):
 
 # creates the dataframe for the ML pipeline and saves it to a csv_file
 # features of the two player are merged in one (e.g. with differences or combinations)
-def create_csv_merge(df, csv_path, csv_path_test):
+def create_csv_merge(df):
     print(f'\n\nMerging features...')
     # derive features: difference in rank, rank points, height, age, and hand combination
     (basic_cols, hist_cols, det_cols, cat_cols) = get_all_features_cols() 
@@ -327,13 +327,12 @@ def create_csv_merge(df, csv_path, csv_path_test):
     le = LabelEncoder()
     for cat_col in cat_cols:
         df[cat_col] = le.fit_transform(np.array(df[cat_col]).reshape((-1)))
-    create_train_test_csv(df, csv_path, csv_path_test)
+    create_train_test_csv(df, settings.data_features_le_csv, settings.data_features_le_test_csv)
 
     # one-hot encoding
     df_ohe = pd.get_dummies(data=df_ohe, columns=cat_cols)
-    csv_path_ohe, csv_path_test_ohe = csv_path.replace('.', '_onehot.'), csv_path_test.replace('.', '_onehot.')
     # split train and test set and save files
-    create_train_test_csv(df_ohe, csv_path_ohe, csv_path_test_ohe)
+    create_train_test_csv(df_ohe, settings.data_features_onehot_csv, settings.data_features_onehot_test_csv)
 
 
 # swaps the data of the two players for half the dataset, because by default player 1 is always the winner
@@ -359,12 +358,12 @@ def swap_player_data(df):
 
 def feature_selection():
     # step 1: create initial csv containing augmented features
-    make_features_csv()
+    #make_features_csv()
 
     # step 2: create csv containing numerical features only
     # features of both players will be merged
     df = pd.read_csv(settings.data_csv)
     swap_player_data(df)
-    create_csv_merge(df, settings.data_features_csv, settings.data_features_test_csv)
+    create_csv_merge(df)
 
 feature_selection()
