@@ -13,7 +13,8 @@ def get_df_from_excel(xl_name):
         return pd.read_excel(xls)
     elif os.path.isfile(xlsx):
         return pd.read_excel(xlsx)
-    print(f'Could not find file {xl_name}')
+    else:
+        print(f'Could not find file {xl_name}')
 
 # function to merge data from the two sources
 def merge_dfs(df1, df2, out_file):

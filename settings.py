@@ -1,4 +1,4 @@
-path_original = '/content/drive/My Drive/ml_project/data/original'
+path_original = 'data/original'
 path_yearly = f'{path_original}/yearly'
 data_original_csv = f'{path_original}/data_original.csv'                       # csv containing the full data from the selected years
 
