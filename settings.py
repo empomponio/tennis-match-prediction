@@ -20,7 +20,7 @@ data_features_test_csv = f'{path_generated}/data_features_onehot_test.csv'
 
 
 
-path_feature_elimination = f'{path_generated}/FeatureElimination'
+path_feature_elimination = f'{path_generated}/featureElimination'
 data_features_lr_csv = f'{path_feature_elimination}/data_features_lr.csv'               # features are selected with a logistic regression estimator         
 data_features_lr_test_csv = f'{path_feature_elimination}/data_features_lr_test.csv'
 data_features_svc_csv = f'{path_feature_elimination}/data_features_svc.csv'             # features are selected with a support vector estimator         

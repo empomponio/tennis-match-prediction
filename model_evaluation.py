@@ -6,7 +6,7 @@ from sklearn.preprocessing import  StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.svm import LinearSVC
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier, AdaBoostClassifier, HistGradientBoostingClassifier
 
 import settings
 
@@ -117,8 +117,41 @@ def model_evaluation():
         evaluate_model(df_le, df_le_test, model, name)
         evaluate_model(df_ohe, df_ohe_test, model, name)
 
-model_evaluation()
 
+def model_evaluation_advanced():
+    lr = make_pipeline(StandardScaler(), LogisticRegression(random_state=123))
+    svc = make_pipeline(StandardScaler(), LinearSVC(random_state=123, dual=False))
+    dtc = DecisionTreeClassifier(random_state=123)
+    rfc = RandomForestClassifier(random_state=123)
+    etc = ExtraTreesClassifier(random_state=123)
+    abc = AdaBoostClassifier(random_state=123)
+    gbt = HistGradientBoostingClassifier(random_state=123)
+
+    models = {
+        'Logistic Regression': lr, 
+        'Support Vector Machine': svc,
+        'Decision Tree Classifier': dtc,
+        'Random Forest Classifier': rfc,
+        'Extra Trees Classifier': etc,
+        'AdaBoost Classifier': abc,
+        'Gradient Boosting Classifier': gbt
+    }
+
+    for name, model in models.items():
+        # all features
+        df_all = pd.read_csv(settings.data_features_csv)
+        df_all_test = pd.read_csv(settings.data_features_test_csv)
+
+        # hand-picked features
+        df = pd.read_csv(settings.data_features_hp_csv)
+        df_test = pd.read_csv(settings.data_features_hp_test_csv)
+
+        evaluate_model(df_all, df_all_test, model, name)
+        evaluate_model(df, df_test, model, name)
+
+
+#model_evaluation()
+model_evaluation_advanced()
 
 
 

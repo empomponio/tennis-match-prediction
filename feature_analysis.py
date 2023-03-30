@@ -3,7 +3,6 @@ import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import LinearSVC
-from sklearn.pipeline import make_pipeline
 from sklearn.feature_selection import RFECV
 from sklearn.model_selection import StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier
@@ -19,8 +18,10 @@ import settings
 
 
 def find_best_features(X, y, clf, model_name):
+    print('\nFeature elimination for', model_name)
     min_features_to_select = 1    # Minimum number of features to consider
     cv = StratifiedKFold(5)
+    X = StandardScaler().fit_transform(X)
 
     rfecv = RFECV(
         estimator=clf,
@@ -46,16 +47,24 @@ def find_best_features(X, y, clf, model_name):
     return rfecv.ranking_
 
 def feature_elimination(X, y):
-    clf = make_pipeline(StandardScaler(), LogisticRegression(random_state=123))
-    find_best_features(X, y, clf, 'Logistic Regression')
+    lr = LogisticRegression(random_state=123)
+    svc = LinearSVC(random_state=123, dual=False)
+    models = {'Logistic Regression':lr, 'LinearSVC':svc}
 
-    clf = make_pipeline(StandardScaler(), LinearSVC(random_state=123, dual=False))
-    find_best_features(X, y, clf, 'LinearSVC')
-
-    clf = DecisionTreeClassifier(random_state=123)
-    find_best_features(X, y, clf, 'Decision Tree')
+    for name, model in models.items():
+        ranking = find_best_features(X, y, model, name)
+        features = X.columns
+        feature_rank_dict = {}
+        for i in range(len(ranking)):
+            rank = ranking[i]
+            if rank not in feature_rank_dict:
+                feature_rank_dict[rank] = [features[i]]
+            else:
+                feature_rank_dict[rank].append(features[i])
+        print(sorted(feature_rank_dict.items()))
 
 def feature_importances(X, y):
+    print('\nComputing feature importance with a Random Forest Classifier')
     feature_names = X.columns
     forest = RandomForestClassifier(random_state=123)
     forest.fit(X, y)
@@ -70,6 +79,9 @@ def feature_importances(X, y):
     ax.set_title("Feature importances using MDI")
     ax.set_ylabel("Mean decrease in impurity")
     fig.tight_layout()
+
+    best_features_series = forest_importances.sort_values(ascending=False)
+    print('Features ordered by importance:\n', best_features_series)
 
 
 def feature_correlation(X):
@@ -106,4 +118,35 @@ def feature_analysis():
     feature_importances(X, y)
     feature_correlation(X)
 
-feature_analysis()
+def create_files_best_features():
+    best_features = [  
+        'rank_diff',
+        'rank_points_logdiff',
+        'height_diff',
+        'age_diff',	
+        'played_diff_year',	
+        'winperc_diff_year',
+        'played_diff_month',	
+        'winperc_diff_month',	
+        'played_diff_surface',	
+        'winperc_diff_surface',	
+        'played_diff_level',	
+        'winperc_diff_level',	
+        'winpercdiff_tourney',	
+        'winperc_matchup',		
+        'serve2perc_diff',	
+        'return2perc_diff',	
+        'bpsavedperc_pdiff',	
+        'matchduration_diff',	
+        'servereturn_diff'   
+        ]
+    cols = best_features + ['winner']
+
+    df = pd.read_csv(settings.data_features_csv, usecols=cols)[cols]
+    df_test = pd.read_csv(settings.data_features_test_csv, usecols=cols)[cols]
+    df.to_csv(settings.data_features_hp_csv, index=False)
+    df_test.to_csv(settings.data_features_hp_test_csv, index=False)
+
+
+#feature_analysis()
+create_files_best_features()
