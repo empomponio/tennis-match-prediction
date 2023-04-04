@@ -7,7 +7,7 @@ path_js = f'{path_yearly}/JeffSackmann'
 path_merged = f'{path_yearly}/merged'
 start_year, end_year = 2006, 2022
 
-path_generated = 'data/generated'
+path_generated = 'data/generated/v2'
 data_csv = f'{path_generated}/data.csv'                                                 # csv with updated columns after first part of feature selection
 data_features_le_csv = f'{path_generated}/data_features_le_.csv'                               # csv with numerical features only, ready to be used in ML algorithms (training and validation)
 data_features_le_test_csv = f'{path_generated}/data_features_le_test.csv'                     # csv with numerical features only, ready to be used in ML algorithms (test)

@@ -356,6 +356,29 @@ def swap_player_data(df):
     df.update(df_swapped)
 
 
+# swaps the data of the two players for half the dataset, because by default player 1 is always the winner
+def swap_player_data_v2(df):
+    print('***********************************************************************************')
+    # update names of columns to refer to player1 and player2 instead of winner and loser
+    cols = get_all_data_cols()
+    updated_cols = ['p1'+col[1:] if col.startswith('w') else 'p2'+col[1:] for col in cols]
+    updated_cols += ['tourney_date']
+    p1_cols = [col for col in updated_cols if col.startswith('p1')]
+    p2_cols = [col for col in updated_cols if col.startswith('p2')]
+    df.columns = updated_cols
+    # add column for winner
+    df['winner'] = 0
+
+    # df columns that will be swapped: player 2 has higher rank (lower rank number) than player 1
+    df_swapped = df[df.p1_rank > df.p2_rank]
+    print(f'Found {len(df_swapped)} out of {len(df)} columns where player with lower rank won the match. ({len(df_swapped)/len(df)}%)')
+    # swap columns for player 1 and 2
+    df_swapped[p1_cols+p2_cols] = df_swapped[p2_cols+p1_cols]
+    # for these rows, the winner will be player 2
+    df_swapped.loc[:, 'winner'] = 1
+    df.update(df_swapped)
+
+
 def feature_selection():
     # step 1: create initial csv containing augmented features
     #make_features_csv()
@@ -363,7 +386,7 @@ def feature_selection():
     # step 2: create csv containing numerical features only
     # features of both players will be merged
     df = pd.read_csv(settings.data_csv)
-    swap_player_data(df)
+    swap_player_data_v2(df)
     create_csv_merge(df)
 
 feature_selection()
