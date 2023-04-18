@@ -1,0 +1,7 @@
+scoring,fit_params,best_score,best_params,running_time
+precision,False,0.5832334013291222,"{'logisticregression__C': 0.0001, 'logisticregression__penalty': 'l2', 'logisticregression__solver': 'lbfgs'}",46
+precision,True,0.5338582298366558,"{'logisticregression__C': 1e-05, 'logisticregression__penalty': 'l2', 'logisticregression__solver': 'saga'}",42
+"make_scorer(precision_score, pos_label=0)",False,0.6882011844586386,"{'logisticregression__C': 1000.0, 'logisticregression__penalty': 'l2', 'logisticregression__solver': 'lbfgs'}",43
+"make_scorer(precision_score, pos_label=0)",True,0.7249980737723543,"{'logisticregression__C': 0.0001, 'logisticregression__penalty': 'l2', 'logisticregression__solver': 'lbfgs'}",43
+accuracy,False,0.6717210206675427,"{'logisticregression__C': 1000.0, 'logisticregression__penalty': 'l2', 'logisticregression__solver': 'lbfgs'}",46
+accuracy,True,0.6671414502752614,"{'logisticregression__C': 1e-05, 'logisticregression__penalty': 'l2', 'logisticregression__solver': 'saga'}",46

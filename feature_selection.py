@@ -12,7 +12,7 @@ def get_hist_cols():
     hist_cols += [col + '_month' for col in hist_vars]
     hist_cols += [col + '_surface' for col in hist_vars]
     hist_cols += [col + '_level' for col in hist_vars]
-    hist_cols += ['winperc_tourney', 'winperc_matchup']
+    hist_cols += ['winperc_tourney', 'winperc_matchup', 'rank_gain', 'rank_points_gain', 'momentum']
     return hist_cols
 
 # gets all columns of the dataframe containing the data features of both winner and loser
@@ -58,7 +58,7 @@ def get_previous_results(past_matches, player, tourney_date, match_num, time_win
     if tourney_level != '':
         past_matches = past_matches[past_matches.tourney_level == tourney_level]
     if tourney_name != '':
-        past_matches = past_matches[past_matches.tourney_name == tourney_name]        
+        past_matches = past_matches[past_matches.tourney_name == tourney_name]    
     if opponent != '':
         past_matches = past_matches[(past_matches.winner_name == opponent) | (past_matches.loser_name == opponent)]
     wins_rows = past_matches[(past_matches.winner_name == player)]
@@ -108,15 +108,41 @@ def get_details_past_matches(past_matches, player, tourney_date):
     
     return [serve_games_perc, return_games_perc, won_1st_perc, won_2nd_perc, won_1st_ret_perc, won_2nd_ret_perc, bp_save_perc, match_dur]
 
+
+def get_rank_gains(df, tourney_date, player, rank, rank_points):
+    last_matches = df[(tourney_date > df.tourney_date) 
+        & ((df.winner_name == player) | (df.loser_name == player))]
+
+    if len(last_matches) == 0:
+        return 0, 0
+    last_match = last_matches.iloc[last_matches.tourney_date.argmax()]
+
+    last_rank_points = last_match.winner_rank_points if last_match.winner_name == player else last_match.loser_rank_points
+    last_rank = last_match.winner_rank if last_match.winner_name == player else last_match.loser_rank
+    rank_gain = last_rank - rank
+    days_diff = (tourney_date-last_match.tourney_date) / np.timedelta64(1, 'D')
+    rank_points_gain = rank_points - last_rank_points
+    rank_gain /= days_diff
+    rank_points_gain /= days_diff
+    return (rank_gain, rank_points_gain)
+
+def get_momentum_data(df, tourney_date, match_num, player):
+    tourney_matches = df[(tourney_date == df.tourney_date) & (df.match_num < match_num) & (df.winner_name == player)]
+    momentum = 1
+    for i in range(len(tourney_matches)):
+        momentum *= tourney_matches.iloc[i].winner_odds
+    return momentum
+
+
 def make_features_csv():
     print('Creating data features....')
 
     # get columns for df
     columns = get_all_data_cols()
-    columns += ['tourney_date']
+    columns += ['tourney_date', 'winner_odds', 'loser_odds']
     # get original df
-    df = pd.read_csv(settings.data_original_csv) 
-    df['tourney_date'] = pd.to_datetime(df['tourney_date'], format='%Y%m%d')    
+    df = pd.read_csv(settings.data_original_csv)
+    df['tourney_date'] = pd.to_datetime(df['tourney_date'], format='%Y%m%d')
     # get augmented df
     df_concat = get_augmented_df(df)
 
@@ -133,8 +159,6 @@ def make_features_csv():
         row += basic_features
 
         # init variables for past features
-        winner = dp.winner_name
-        loser = dp.loser_name
         tourney_date = dp.tourney_date
         match_num = dp.match_num
         surface = dp.surface
@@ -148,16 +172,19 @@ def make_features_csv():
 
         hist_features = []
         det_features = []
-        for player in [winner, loser]:
-            # get historical features
-            (wins_y, played_y, winperc_y) = get_previous_results(past_matches, player, tourney_date, match_num, time_window=365)
-            (wins_m, played_m, winperc_m) = get_previous_results(past_matches, player, tourney_date, match_num, time_window=30)
-            (wins_surf, played_surf, winperc_surf) = get_previous_results(past_matches, player, tourney_date, match_num, time_window=365, surface=surface)
-            (wins_lev, played_lev, winperc_lev) = get_previous_results(past_matches, player, tourney_date, match_num, time_window=365, tourney_level=tourney_level)
-            (_, _, winperc_tourney) = get_previous_results(past_matches, player, tourney_date, match_num, time_window=400, tourney_name=tourney_name)
-            opponent = loser if player == winner else winner
-            (_, _, winperc_matchup) = get_previous_results(past_matches, player, tourney_date, match_num, opponent=opponent)
-            
+        for player in ['winner', 'loser']:
+            player_name = dp[player+'_name']
+            opponent = 'loser' if player == 'winner' else 'winner'
+            opponent_name = dp[opponent+'_name']
+            # get historical features: wins, played matches, win percentages
+            (wins_y, played_y, winperc_y) = get_previous_results(past_matches, player_name, tourney_date, match_num, time_window=365)
+            (wins_m, played_m, winperc_m) = get_previous_results(past_matches, player_name, tourney_date, match_num, time_window=30)
+            (wins_surf, played_surf, winperc_surf) = get_previous_results(past_matches, player_name, tourney_date, match_num, time_window=365, surface=surface)
+            (wins_lev, played_lev, winperc_lev) = get_previous_results(past_matches, player_name, tourney_date, match_num, time_window=365, tourney_level=tourney_level)
+            (_, _, winperc_tourney) = get_previous_results(past_matches, player_name, tourney_date, match_num, time_window=400, tourney_name=tourney_name)
+            (_, _, winperc_matchup) = get_previous_results(past_matches, player_name, tourney_date, match_num, opponent=opponent_name)
+
+
             hist_features += [
                     wins_y, played_y, winperc_y, 
                     wins_m, played_m, winperc_m,
@@ -165,14 +192,24 @@ def make_features_csv():
                     wins_lev, played_lev, winperc_lev,
                     winperc_tourney,
                     winperc_matchup
-                    ]        
+                    ]
+            
+            # get data on rank gains
+            rank = dp[player+'_rank']
+            rank_points = dp[player+'_rank_points']
+            (rank_gain, rank_points_gain)= get_rank_gains(df, tourney_date, player_name, rank, rank_points)
+            # get data on momentum in tournament
+            momentum = get_momentum_data(df, tourney_date, match_num, player_name)
+            
+            hist_features += [rank_gain, rank_points_gain, momentum]
 
             # get details features 
             time_window = 365 # include matches within the chosen number of days
             past_matches_tw = past_matches[((tourney_date-past_matches.tourney_date) / np.timedelta64(1, 'D') <= time_window)]
-            det_features += get_details_past_matches(past_matches_tw, player, tourney_date)
+            det_features += get_details_past_matches(past_matches_tw, player_name, tourney_date)
 
         row += hist_features + det_features
+
         # get categorical features
         winner_hand = 'U' if dp.loser_hand == 'U' else dp.winner_hand
         loser_hand = 'U' if dp.winner_hand == 'U' else dp.loser_hand
@@ -181,8 +218,8 @@ def make_features_csv():
         cat_features = [winner_hand, winner_wildcard, loser_hand, loser_wildcard]
         row += cat_features
 
-        row += [dp.tourney_date]
-        data.append(row)    
+        row += [dp.tourney_date, dp.winner_odds, dp.loser_odds]
+        data.append(row)
         if i==0 or (i+1)%1000 == 0 or i+1==len(df):
             print(f'Computed details for {i+1}/{len(df)} matches.')
     
@@ -202,7 +239,7 @@ def get_all_features_cols():
     hist_cols += [col + '_month' for col in hist_vars]
     hist_cols += [col + '_surface' for col in hist_vars]
     hist_cols += [col + '_level' for col in hist_vars]
-    hist_cols += ['winpercdiff_tourney', 'winperc_matchup']
+    hist_cols += ['winpercdiff_tourney', 'winpercdiff_matchup', 'rankgain_diff', 'rankpointsgain_diff', 'momentum_diff']
 
     det_cols = [
             'serveperc_diff', 'returnperc_diff', 
@@ -249,12 +286,17 @@ def get_hist_features(dp):
     winpercdiff_tourney = dp.p1_winperc_tourney - dp.p2_winperc_tourney
     winpercdiff_matchup = dp.p1_winperc_matchup - dp.p2_winperc_matchup
 
+    rankgain_diff = dp.p1_rank_gain - dp.p2_rank_gain
+    rankpointsgain_diff = dp.p1_rank_points_gain - dp.p2_rank_points_gain
+    momentum_diff = dp.p1_momentum - dp.p2_momentum
+
     return [
             wins_diff_y, played_diff_y, winperc_diff_y,
             wins_diff_m, played_diff_m, winperc_diff_m,
             wins_diff_surf, played_diff_surf, winperc_diff_surf,
             wins_diff_lev, played_diff_lev, winperc_diff_lev,
-            winpercdiff_tourney, winpercdiff_matchup
+            winpercdiff_tourney, winpercdiff_matchup,
+            rankgain_diff, rankpointsgain_diff, momentum_diff
     ]
 
 def get_det_features(dp):  
@@ -307,7 +349,7 @@ def create_csv_merge(df):
     print(f'\n\nMerging features...')
     # derive features: difference in rank, rank points, height, age, and hand combination
     (basic_cols, hist_cols, det_cols, cat_cols) = get_all_features_cols() 
-    columns = basic_cols + hist_cols + det_cols + cat_cols + ['winner', 'tourney_date']
+    columns = basic_cols + hist_cols + det_cols + cat_cols + ['tourney_date', 'winner', 'winner_odds', 'loser_odds']
 
     data = []
     for i in range(len(df)):
@@ -317,52 +359,28 @@ def create_csv_merge(df):
         det_features = get_det_features(dp)
         cat_features = get_cat_features(dp)
         # append columns
-        data.append(basic_features + hist_features + det_features + cat_features + [dp.winner, dp.tourney_date])
+        data.append(basic_features +
+                    hist_features +
+                    det_features +
+                    cat_features +
+                    [dp.tourney_date, dp.winner, dp.winner_odds, dp.loser_odds])
 
     # create dataframe
     df = pd.DataFrame(columns=columns, data=data)
-    df_ohe = df.copy() # df with one-hot encoding for categorical features
 
     # label encoding
-    le = LabelEncoder()
     for cat_col in cat_cols:
-        df[cat_col] = le.fit_transform(np.array(df[cat_col]).reshape((-1)))
-    create_train_test_csv(df, settings.data_features_le_csv, settings.data_features_le_test_csv)
+        df[cat_col] = LabelEncoder().fit_transform(np.array(df[cat_col]).reshape((-1)))
 
-    # one-hot encoding
-    df_ohe = pd.get_dummies(data=df_ohe, columns=cat_cols)
-    # split train and test set and save files
-    create_train_test_csv(df_ohe, settings.data_features_onehot_csv, settings.data_features_onehot_test_csv)
+    create_train_test_csv(df, settings.data_features_csv, settings.data_features_test_csv)
 
 
-# swaps the data of the two players for half the dataset, because by default player 1 is always the winner
-def swap_player_data(df):
-    # update names of columns to refer to player1 and player2 instead of winner and loser
-    cols = get_all_data_cols()
-    updated_cols = ['p1'+col[1:] if col.startswith('w') else 'p2'+col[1:] for col in cols]
-    updated_cols += ['tourney_date']
-    p1_cols = [col for col in updated_cols if col.startswith('p1')]
-    p2_cols = [col for col in updated_cols if col.startswith('p2')]
-    df.columns = updated_cols
-    # add column for winner
-    df['winner'] = 1
-
-    # df where columns will be swapped (half dataset)
-    df_swapped = df.sample(int(len(df)/2), random_state=123)
-    # swap columns for player 1 and 2
-    df_swapped[p1_cols+p2_cols] = df_swapped[p2_cols+p1_cols]
-    # for these rows, the winner will be player 2
-    df_swapped['winner'] = 2
-    df.update(df_swapped)
-
-
-# swaps the data of the two players for half the dataset, because by default player 1 is always the winner
-def swap_player_data_v2(df):
+def sort_player_data(df):
     print('***********************************************************************************')
     # update names of columns to refer to player1 and player2 instead of winner and loser
     cols = get_all_data_cols()
     updated_cols = ['p1'+col[1:] if col.startswith('w') else 'p2'+col[1:] for col in cols]
-    updated_cols += ['tourney_date']
+    updated_cols += ['tourney_date', 'winner_odds', 'loser_odds']
     p1_cols = [col for col in updated_cols if col.startswith('p1')]
     p2_cols = [col for col in updated_cols if col.startswith('p2')]
     df.columns = updated_cols
@@ -381,12 +399,12 @@ def swap_player_data_v2(df):
 
 def feature_selection():
     # step 1: create initial csv containing augmented features
-    #make_features_csv()
+    make_features_csv()
 
     # step 2: create csv containing numerical features only
     # features of both players will be merged
     df = pd.read_csv(settings.data_csv)
-    swap_player_data_v2(df)
+    sort_player_data(df)
     create_csv_merge(df)
 
 feature_selection()

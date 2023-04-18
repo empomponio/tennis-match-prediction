@@ -1,0 +1,4 @@
+scoring,fit_params,best_score,best_params,running_time
+precision,False,0.6527463238432747,"{'n_estimators': 1000, 'min_samples_split': 10, 'max_features': 'log2', 'max_depth': 3, 'criterion': 'gini', 'bootstrap': False}",4119
+"make_scorer(precision_score, pos_label=0)",True,0.7333622910551879,"{'n_estimators': 10, 'min_samples_split': 5, 'max_features': 'log2', 'max_depth': 3, 'criterion': 'entropy', 'bootstrap': True}",4155
+accuracy,False,0.6745916059311384,"{'n_estimators': 1000, 'min_samples_split': 2, 'max_features': 'sqrt', 'max_depth': None, 'criterion': 'entropy', 'bootstrap': True}",6449

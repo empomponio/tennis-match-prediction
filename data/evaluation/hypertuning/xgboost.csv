@@ -1,0 +1,7 @@
+scoring,fit_params,best_score,best_params,running_time
+precision,False,0.506216252596708,{},20
+precision,True,0.40391498917098706,{},19
+"make_scorer(precision_score, pos_label=0)",False,0.6952787743126535,{},18
+"make_scorer(precision_score, pos_label=0)",True,0.6914210682613272,{},18
+accuracy,False,0.65787886403619,{},18
+accuracy,True,0.5841417441568234,{},18

@@ -1,0 +1,4 @@
+scoring,fit_params,best_score,best_params,running_time
+precision,False,0.3248009262553834,"{'n_estimators': 200, 'max_depth': 2, 'learning_rate': 0.002154434690031882, 'booster': 'dart'}",243
+"make_scorer(precision_score, pos_label=0)",True,0.6676161141249078,"{'n_estimators': 100, 'max_depth': 1, 'learning_rate': 0.0001, 'booster': 'dart'}",62
+accuracy,False,0.6751947725559185,"{'n_estimators': 200, 'max_depth': 5, 'learning_rate': 0.046415888336127774, 'booster': 'dart'}",257
