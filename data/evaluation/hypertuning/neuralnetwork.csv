@@ -1,0 +1,9 @@
+scoring,fit_params,best_score,best_params,running_time
+precision,<class 'NoneType'>,0.5924988947922777,"{'optimizer__learning_rate': 0.01, 'model__neurons': 64, 'model__dropout_rate': 0.7000000000000001, 'epochs': 10, 'batch_size': 64}",1900
+precision,<class 'pandas.core.series.Series'>,0.5571037664307381,"{'optimizer__learning_rate': 0.001, 'model__neurons': 16, 'model__dropout_rate': 0.8, 'epochs': 50, 'batch_size': 64}",1184
+"make_scorer(precision_score, pos_label=0)",<class 'NoneType'>,0.6978820000402788,"{'optimizer__learning_rate': 0.001, 'model__neurons': 1024, 'model__dropout_rate': 0.2, 'epochs': 5, 'batch_size': 256}",1514
+"make_scorer(precision_score, pos_label=0)",<class 'pandas.core.series.Series'>,0.6963610042429169,"{'optimizer__learning_rate': 0.01, 'model__neurons': 64, 'model__dropout_rate': 0.1, 'epochs': 50, 'batch_size': 256}",2054
+accuracy,<class 'NoneType'>,0.6695988059274633,"{'optimizer__learning_rate': 1.0, 'model__neurons': 1024, 'model__dropout_rate': 0.6, 'epochs': 100, 'batch_size': 2048}",2901
+accuracy,<class 'pandas.core.series.Series'>,0.6570327604666429,"{'optimizer__learning_rate': 0.1, 'model__neurons': 128, 'model__dropout_rate': 0.30000000000000004, 'epochs': 50, 'batch_size': 16}",3243
+f1,<class 'NoneType'>,0.3695153192284778,"{'optimizer__learning_rate': 0.1, 'model__neurons': 256, 'model__dropout_rate': 0.6, 'epochs': 10, 'batch_size': 1024}",2989
+f1,<class 'pandas.core.series.Series'>,0.41161633380071994,"{'optimizer__learning_rate': 0.01, 'model__neurons': 32, 'model__dropout_rate': 0.4, 'epochs': 5, 'batch_size': 512}",1531

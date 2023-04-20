@@ -1,0 +1,7 @@
+scoring,fit_params,best_score,best_params,running_time
+precision,<class 'NoneType'>,0.6688448226935535,"{'optimizer__learning_rate': 0.001, 'model__neurons': 64, 'model__dropout_rate': 0.1, 'epochs': 100, 'batch_size': 256}",729
+precision,<class 'pandas.core.series.Series'>,0.6567535127594748,"{'optimizer__learning_rate': 0.1, 'model__neurons': 8, 'model__dropout_rate': 0.2, 'epochs': 5, 'batch_size': 16}",941
+f1,<class 'NoneType'>,0.6697103857153545,"{'optimizer__learning_rate': 0.01, 'model__neurons': 64, 'model__dropout_rate': 0.30000000000000004, 'epochs': 50, 'batch_size': 256}",739
+f1,<class 'pandas.core.series.Series'>,0.6577308543941272,"{'optimizer__learning_rate': 0.001, 'model__neurons': 32, 'model__dropout_rate': 0.4, 'epochs': 100, 'batch_size': 32}",2125
+accuracy,<class 'NoneType'>,0.6680628987049595,"{'optimizer__learning_rate': 0.001, 'model__neurons': 128, 'model__dropout_rate': 0.2, 'epochs': 100, 'batch_size': 4096}",1499
+accuracy,<class 'pandas.core.series.Series'>,0.6584289444230828,"{'optimizer__learning_rate': 1.0, 'model__neurons': 32, 'model__dropout_rate': 0.7000000000000001, 'epochs': 50, 'batch_size': 128}",2972

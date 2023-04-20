@@ -1,11 +1,22 @@
 from sklearn.ensemble import AdaBoostClassifier, HistGradientBoostingClassifier, RandomForestClassifier
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV, train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, accuracy_score, make_scorer, precision_score
+from sklearn.metrics import classification_report, accuracy_score, make_scorer, precision_score, fbeta_score
 from sklearn.tree import DecisionTreeClassifier
 from xgboost import XGBClassifier
 from sklearn.preprocessing import  StandardScaler
 from sklearn.pipeline import make_pipeline
+
+import tensorflow as tf
+from sklearn.model_selection import GridSearchCV
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import Dropout
+from scikeras.wrappers import KerasClassifier
+
+from keras import models, layers
+from keras.metrics import Precision
+
 
 import pandas as pd
 import numpy as np
@@ -232,7 +243,8 @@ def randomforest_tuning(X, y, w):
     }
 
     clf = RandomForestClassifier(random_state=123)
-    scoring_list = ['precision', make_scorer(precision_score, pos_label=0), 'accuracy']
+    #scoring_list = ['precision', make_scorer(precision_score, pos_label=0), 'accuracy']
+    scoring_list = ['f1', make_scorer(fbeta_score, beta=.5)]
     fit_params_list = [{}, {'sample_weight' : w}]
 
     results = []
@@ -253,6 +265,54 @@ def randomforest_tuning(X, y, w):
     csv_name = f'{settings.path_hypertuning}/randomforest.csv'
     results_df.to_csv(csv_name, index=False)
     print('Saved results to', csv_name)
+
+
+def neuralnetwork_tuning(X, y, w):
+
+    tf.random.set_seed(123)
+
+    neurons = np.logspace(3, 10, num=8, base=2, dtype=int)
+    dropout_rates = np.linspace(0.1, 0.8, num=8)
+    learning_rates = np.logspace(-4, 1, 6)
+    batch_size = np.logspace(4, 12, num=9, base=2, dtype=int)
+    epochs = [5, 10, 50, 100]
+
+    param_grid = dict(batch_size=batch_size, epochs=epochs, model__dropout_rate=dropout_rates, optimizer__learning_rate=learning_rates, model__neurons=neurons)
+    #print(param_grid)
+
+    def create_model(dropout_rate, neurons):
+        model = models.Sequential()
+        model.add(Dense(units=neurons, activation='relu', input_shape=(len(X.columns),)))
+        model.add(layers.Dropout(dropout_rate))
+        model.add(layers.Dense(units=1, activation='sigmoid'))
+        model.compile(loss='binary_crossentropy', optimizer='adam')
+        return model
+
+    model = KerasClassifier(model=create_model, verbose=0)
+
+    scoring_list = ['precision', make_scorer(precision_score, pos_label=0), 'accuracy', 'f1']
+    sample_weights = [None, w]
+    
+    results = []
+    variables = ['scoring', 'fit_params', 'best_score', 'best_params', 'running_time']
+
+    for scoring in scoring_list:
+        for sample_weight  in sample_weights:
+            start = time.time()
+            search = RandomizedSearchCV(model, param_grid, n_jobs=-1, n_iter=20, scoring=scoring)
+            print(f'Starting search for scoring: {scoring}, sample_weight: {type(sample_weight)}')
+            search.fit(X, y, sample_weight=sample_weight)
+            end = time.time()
+            running_time = math.trunc(time.time() - start)
+            print(f'Best parameters (score={search.best_score_})')
+            print(search.best_params_)
+            print(f'Running time: {math.trunc(end-start)} seconds')
+            results.append([scoring, type(sample_weight), search.best_score_, search.best_params_, running_time])
+
+        results_df = pd.DataFrame(data=results, columns=variables)
+        csv_name = f'{settings.path_hypertuning}/neuralnetwork.csv'
+        results_df.to_csv(csv_name, index=False)
+        print('Saved results to', csv_name)
 
 
 def logisticregression_tuning(X, y, w):
@@ -310,6 +370,6 @@ def model_tuning():
     X_train.pop('loser_odds')
     odds_test = X_test.pop('winner_odds')
     #logisticregression_tuning(X_train, y_train, odds_train)
-    randomforest_tuning(X_train, y_train, odds_train)
-
+    #randomforest_tuning(X_train, y_train, odds_train)
+    neuralnetwork_tuning(X_train, y_train, odds_train)
 model_tuning()
