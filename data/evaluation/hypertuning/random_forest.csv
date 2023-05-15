@@ -1,0 +1,2 @@
+scoring,best_score,best_params,running_time
+"make_scorer(fbeta_score, beta=0.5)",0.4858464109000099,"{'n_estimators': 100, 'min_samples_split': 2, 'max_features': 'sqrt', 'max_depth': 3, 'criterion': 'gini', 'bootstrap': True}",679

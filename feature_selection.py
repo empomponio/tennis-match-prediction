@@ -1,3 +1,4 @@
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 import pandas as pd
 import numpy as np
@@ -36,7 +37,10 @@ def get_all_data_cols():
     p_cat_cols = ['hand', 'wildcard']
     cat_cols = ['w_' + col for col in p_cat_cols]
     cat_cols += ['l_' + col for col in p_cat_cols]    
-    return basic_cols + hist_cols + details_cols + cat_cols
+
+    odds_cols = ['w_odds', 'l_odds']
+
+    return basic_cols + hist_cols + details_cols + cat_cols + odds_cols
 
 # function that takes as input the original df and concatenates it with the data for start_year-1
 # we need to add the that in order to get the part features (history and details) for start_year 
@@ -139,7 +143,7 @@ def make_features_csv():
 
     # get columns for df
     columns = get_all_data_cols()
-    columns += ['tourney_date', 'winner_odds', 'loser_odds']
+    columns += ['tourney_date']
     # get original df
     df = pd.read_csv(settings.data_original_csv)
     df['tourney_date'] = pd.to_datetime(df['tourney_date'], format='%Y%m%d')
@@ -217,8 +221,9 @@ def make_features_csv():
         loser_wildcard = 'Y' if dp.loser_entry == 'WC' else 'N'
         cat_features = [winner_hand, winner_wildcard, loser_hand, loser_wildcard]
         row += cat_features
+        row += [dp.winner_odds, dp.loser_odds]
 
-        row += [dp.tourney_date, dp.winner_odds, dp.loser_odds]
+        row += [dp.tourney_date]
         data.append(row)
         if i==0 or (i+1)%1000 == 0 or i+1==len(df):
             print(f'Computed details for {i+1}/{len(df)} matches.')
@@ -328,6 +333,7 @@ def get_cat_features(dp):
         return [hand_matchup, wildcard_matchup]
 
 
+"""
 def create_train_test_csv(df, csv_path, csv_path_test):
     # init test dataset with the data from the last year
     df['tourney_date'] = pd.to_datetime(df['tourney_date'])
@@ -342,14 +348,29 @@ def create_train_test_csv(df, csv_path, csv_path_test):
     print('Saved training/validation dataframe in path', csv_path)
     df_test.to_csv(csv_path_test, index=False)
     print('Saved test dataframe in path', csv_path_test)
+"""
+
+def create_train_test_csv(df, csv_path, csv_path_test):
+    y = df.pop('winner')
+    df.pop('tourney_date')
+    df_train, df_test, y_train, y_test = train_test_split(df, y, test_size=0.33, stratify=y)
+    df_train['winner'] = y_train
+    df_test['winner'] = y_test
+
+    # save files
+    df_train.to_csv(csv_path, index=False)
+    print('Saved training/validation dataframe in path', csv_path)
+    df_test.to_csv(csv_path_test, index=False)
+    print('Saved test dataframe in path', csv_path_test)
+
 
 # creates the dataframe for the ML pipeline and saves it to a csv_file
 # features of the two player are merged in one (e.g. with differences or combinations)
 def create_csv_merge(df):
     print(f'\n\nMerging features...')
     # derive features: difference in rank, rank points, height, age, and hand combination
-    (basic_cols, hist_cols, det_cols, cat_cols) = get_all_features_cols() 
-    columns = basic_cols + hist_cols + det_cols + cat_cols + ['tourney_date', 'winner', 'winner_odds', 'loser_odds']
+    (basic_cols, hist_cols, det_cols, cat_cols) = get_all_features_cols()
+    columns = basic_cols + hist_cols + det_cols + cat_cols + ['p0_odds', 'p1_odds', 'winner', 'tourney_date']
 
     data = []
     for i in range(len(df)):
@@ -363,7 +384,7 @@ def create_csv_merge(df):
                     hist_features +
                     det_features +
                     cat_features +
-                    [dp.tourney_date, dp.winner, dp.winner_odds, dp.loser_odds])
+                    [dp.p1_odds, dp.p2_odds, dp.winner, dp.tourney_date])
 
     # create dataframe
     df = pd.DataFrame(columns=columns, data=data)
@@ -380,7 +401,7 @@ def sort_player_data(df):
     # update names of columns to refer to player1 and player2 instead of winner and loser
     cols = get_all_data_cols()
     updated_cols = ['p1'+col[1:] if col.startswith('w') else 'p2'+col[1:] for col in cols]
-    updated_cols += ['tourney_date', 'winner_odds', 'loser_odds']
+    updated_cols += ['tourney_date']
     p1_cols = [col for col in updated_cols if col.startswith('p1')]
     p2_cols = [col for col in updated_cols if col.startswith('p2')]
     df.columns = updated_cols
@@ -399,7 +420,7 @@ def sort_player_data(df):
 
 def feature_selection():
     # step 1: create initial csv containing augmented features
-    make_features_csv()
+    #make_features_csv()
 
     # step 2: create csv containing numerical features only
     # features of both players will be merged
@@ -408,3 +429,22 @@ def feature_selection():
     create_csv_merge(df)
 
 feature_selection()
+
+
+
+
+
+
+
+def get_sorted_odds(df):
+  winner_odds = [row['p0_odds'] if row['winner'] == 0 else row['p1_odds'] for index, row in df.iterrows()]
+  loser_odds = [row['p1_odds'] if row['winner'] == 0 else row['p0_odds'] for index, row in df.iterrows()] 
+  return (winner_odds, loser_odds)
+
+def get_x_y_w(csv_file):
+    df = pd.read_csv(csv_file)
+    (weights, _) = get_sorted_odds(df)
+    y = df.pop('winner')
+    df.pop('p1_odds')
+    X = df
+    return (X, y, weights)

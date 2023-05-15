@@ -1,0 +1,4 @@
+scoring,best_score,best_params,running_time
+precision,0.6237471411093034,"{'reg_lambda': 0.1, 'reg_alpha': 0, 'n_estimators': 500, 'max_depth': 24, 'learning_rate': 1, 'gamma': 10, 'booster': 'gblinear'}",592
+f1,0.44987270007356794,"{'reg_lambda': 10, 'reg_alpha': 0.1, 'n_estimators': 500, 'max_depth': 12, 'learning_rate': 1, 'gamma': 0, 'booster': 'dart'}",5226
+accuracy,0.6989264913409228,"{'reg_lambda': 1, 'reg_alpha': 2, 'n_estimators': 100, 'max_depth': 2, 'learning_rate': 0.1, 'gamma': 10, 'booster': 'dart'}",5036
