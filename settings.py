@@ -17,6 +17,8 @@ data_features_onehot_test_csv = f'{path_generated}/data_features_onehot_test.csv
 data_features_csv = f'{path_generated}/data_features.csv'
 data_features_test_csv = f'{path_generated}/data_features_test.csv'
 
+data_features2_csv = f'{path_generated}/data_features2.csv'
+data_features2_test_csv = f'{path_generated}/data_features2_test.csv'
 
 
 
@@ -24,7 +26,7 @@ path_feature_elimination = f'{path_generated}/featureElimination'
 data_features_lr_csv = f'{path_feature_elimination}/data_features_lr.csv'               # features are selected with a logistic regression estimator         
 data_features_lr_test_csv = f'{path_feature_elimination}/data_features_lr_test.csv'
 data_features_svc_csv = f'{path_feature_elimination}/data_features_svc.csv'             # features are selected with a support vector estimator         
-data_features_svc_test_csv = f'{path_feature_elimination}/data_features_svc_test.csv'  
+data_features_svc_test_csv = f'{path_feature_elimination}/data_features_svc_test.csv' 
 data_features_rf_csv = f'{path_feature_elimination}/data_features_rf.csv'               # feature selected according to importance computed with random forest as decrease in impurity         
 data_features_rf_test_csv = f'{path_feature_elimination}/data_features_rf_test.csv'
 data_features_hp_csv = f'{path_feature_elimination}/data_features.csv'                  # features are hand-picked according to interpretation of previous results        
@@ -35,3 +37,5 @@ path_evaluation = 'data/evaluation'
 data_train_csv = f'{path_evaluation}/data_train.csv'
 data_eval_csv = f'{path_evaluation}/data_eval.csv'
 path_hypertuning = f'{path_evaluation}/hypertuning'
+
+path_plots = 'plots'

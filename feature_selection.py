@@ -353,7 +353,7 @@ def create_train_test_csv(df, csv_path, csv_path_test):
 def create_train_test_csv(df, csv_path, csv_path_test):
     y = df.pop('winner')
     df.pop('tourney_date')
-    df_train, df_test, y_train, y_test = train_test_split(df, y, test_size=0.33, stratify=y)
+    df_train, df_test, y_train, y_test = train_test_split(df, y, test_size=0.33, stratify=y, random_state=123)
     df_train['winner'] = y_train
     df_test['winner'] = y_test
 
@@ -418,6 +418,23 @@ def sort_player_data(df):
     df.update(df_swapped)
 
 
+def create_csv_double(df):
+    features_to_drop = ['name', 'odds']
+    cols_to_drop = ['p1_' + col for col in features_to_drop]
+    cols_to_drop += ['p2_' + col for col in features_to_drop]
+
+    cat_features = ['hand', 'wildcard']
+    cat_cols = ['p1_' + col for col in cat_features]
+    cat_cols += ['p2_' + col for col in cat_features]
+
+    df = df.drop(columns=cols_to_drop)
+    # label encoding
+    for cat_col in cat_cols:
+        df[cat_col] = LabelEncoder().fit_transform(np.array(df[cat_col]).reshape((-1)))
+    
+    create_train_test_csv(df, settings.data_features2_csv, settings.data_features2_test_csv)
+
+
 def feature_selection():
     # step 1: create initial csv containing augmented features
     #make_features_csv()
@@ -426,6 +443,7 @@ def feature_selection():
     # features of both players will be merged
     df = pd.read_csv(settings.data_csv)
     sort_player_data(df)
+    create_csv_double(df)
     create_csv_merge(df)
 
 feature_selection()
@@ -436,15 +454,3 @@ feature_selection()
 
 
 
-def get_sorted_odds(df):
-  winner_odds = [row['p0_odds'] if row['winner'] == 0 else row['p1_odds'] for index, row in df.iterrows()]
-  loser_odds = [row['p1_odds'] if row['winner'] == 0 else row['p0_odds'] for index, row in df.iterrows()] 
-  return (winner_odds, loser_odds)
-
-def get_x_y_w(csv_file):
-    df = pd.read_csv(csv_file)
-    (weights, _) = get_sorted_odds(df)
-    y = df.pop('winner')
-    df.pop('p1_odds')
-    X = df
-    return (X, y, weights)
