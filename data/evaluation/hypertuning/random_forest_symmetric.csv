@@ -1,0 +1,2 @@
+scoring,best_score,best_params,running_time
+accuracy,0.6731163078871651,"{'criterion': 'entropy', 'max_depth': 10, 'max_features': 'log2', 'min_samples_split': 2, 'n_estimators': 500}",8599

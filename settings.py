@@ -14,11 +14,14 @@ data_features_le_test_csv = f'{path_generated}/data_features_le_test.csv'       
 data_features_onehot_csv = f'{path_generated}/data_features_onehot.csv'                 # csv with numerical features only, ready to be used in ML algorithms (training and validation)
 data_features_onehot_test_csv = f'{path_generated}/data_features_onehot_test.csv'       # csv with numerical features only, ready to be used in ML algorithms (test)
 
-data_features_csv = f'{path_generated}/data_features.csv'
-data_features_test_csv = f'{path_generated}/data_features_test.csv'
+path_feature_files = f'{path_generated}/feature_files'
+data_symmetric_csv = f'{path_feature_files}/symmetric.csv'
+data_symmetric_test_csv = f'{path_feature_files}/symmetric_test.csv'
 
-data_features2_csv = f'{path_generated}/data_features2.csv'
-data_features2_test_csv = f'{path_generated}/data_features2_test.csv'
+data_double_csv = f'{path_feature_files}/double.csv'
+data_double_test_csv = f'{path_feature_files}/double_test.csv'
+data_random_csv = f'{path_feature_files}/random.csv'
+data_random_test_csv = f'{path_feature_files}/random_test.csv'
 
 
 

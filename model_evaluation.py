@@ -12,6 +12,7 @@ from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier, AdaBo
 from sklearn.metrics import classification_report
 
 from sklearn.dummy import DummyClassifier
+from xgboost import XGBClassifier
 
 
 import settings
@@ -341,6 +342,12 @@ def model_evaluation():
     winnerodds_eval = X_eval.pop('winner_odds').array
     loserodds_eval = X_eval.pop('loser_odds').array
     evaluate_randomforest(X_train, y_train, X_eval, y_eval, winnerodds_train, winnerodds_eval, loserodds_eval)
+
+
+
+
+
+
 
 model_evaluation()
 model_evaluation_advanced()

@@ -1,0 +1,2 @@
+scoring,best_score,best_params,running_time
+accuracy,0.6693739185503214,"{'logisticregression__C': 10000.0, 'logisticregression__penalty': 'l2', 'logisticregression__solver': 'lbfgs'}",54

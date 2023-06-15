@@ -1,0 +1,2 @@
+scoring,best_score,best_params,running_time
+accuracy,0.6664784445574721,"{'optimizer__learning_rate': 0.01, 'model__neurons': 512, 'model__dropout_rate': 0.30000000000000004, 'epochs': 50, 'batch_size': 512}",7088
