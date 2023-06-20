@@ -1,0 +1,2 @@
+scoring,best_score,best_params,running_time
+"make_scorer(fbeta_score, beta=0.5)",0.45000723194898457,"{'scale_pos_weight': 10, 'reg_lambda': 0.1, 'reg_alpha': 0.1, 'n_estimators': 100, 'max_depth': 12, 'learning_rate': 0.1, 'gamma': 0, 'booster': 'dart'}",3631

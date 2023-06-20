@@ -25,7 +25,7 @@ from keras.optimizers import Adam
 
 def find_best_features(X, y, clf, model_name):
     print(f'\nFeature elimination for {model_name}')
-    min_features_to_select = 1    # Minimum number of features to consider
+    min_features_to_select = 10    # Minimum number of features to consider
     cv = StratifiedKFold(5)
     X = StandardScaler().fit_transform(X)
 
@@ -33,7 +33,7 @@ def find_best_features(X, y, clf, model_name):
         estimator=clf,
         step=1,
         cv=cv,
-        scoring="accuracy",
+        scoring='accuracy',
         min_features_to_select=min_features_to_select,
         n_jobs=-1,
     )

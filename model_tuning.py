@@ -16,7 +16,6 @@ from scikeras.wrappers import KerasClassifier
 
 from keras import models, layers
 from keras.metrics import Precision
-from tensorflow import keras
 
 import pandas as pd
 import numpy as np
@@ -88,7 +87,9 @@ def hypertune_model(X, y, scoring_list, clf_name, search):
 def model_tuning():
 
     #scoring_list = ['precision', 'f1', 'accuracy']
-    scoring_list = ['accuracy']
+    #scoring_list = ['f1']
+    scoring_list = [make_scorer(fbeta_score, beta=0.5)]
+
 
     df1 = pd.read_csv(settings.data_symmetric_csv)
     df2 = pd.read_csv(settings.data_double_csv)
@@ -122,21 +123,23 @@ def model_tuning():
     rf_search = GridSearchCV(rf, rf_grid,  n_jobs=n_jobs, cv=cv)
 
     xgb = XGBClassifier(random_state=123)
+
     xgb_grid =  {
         'learning_rate':[0.3, 0.1, 0.6],
-        'n_estimators': [100, 200, 500],
+        'n_estimators': [100, 200],
         'max_depth' : [6, 2, 12],
         'booster' : ['gbtree', 'gblinear', 'dart'],  
         'gamma' : [0, 1, 10],   
         'reg_lambda' : [1, 0, 0.1],
-        'reg_alpha' : [0, 0.1, 1] 
+        'reg_alpha' : [0, 0.1, 1],
+        #'scale_pos_weight' : [10, 25, 50, 75, 99, 100, 1000]
     }
-    xgb_search = RandomizedSearchCV(xgb, xgb_grid,  n_jobs=n_jobs, cv=cv, n_iter=100, random_state=123)
+    xgb_search = RandomizedSearchCV(xgb, xgb_grid,  n_jobs=n_jobs, cv=cv, n_iter=100)
 
     clf_list = [
-        (lr_search, 'logistic_regression'),
-        (rf_search, 'random_forest'),
-        (xgb_search, 'xgboost'),
+        #(lr_search, 'logistic_regression'),
+        #(rf_search, 'random_forest'),
+        (xgb_search, 'xgboost_f1'),
     ]
 
     y1 = df1.pop('winner')
@@ -144,13 +147,11 @@ def model_tuning():
     y3 = df3.pop('winner')
 
     df_list = [
-        #(df1, y1, 'symmetric'), 
+        (df1, y1, 'symmetric'), 
         #(df2, y2, 'double'), 
-        (df3, y3, 'random')
+        #(df3, y3, 'random')
     ]
 
-
-    """
     for (clf_search, clf_name) in clf_list:
         for (X, y, df_name) in df_list:
             print('Tuning', clf_name)
@@ -158,8 +159,7 @@ def model_tuning():
                             scoring_list=scoring_list, 
                             search=clf_search, 
                             clf_name=f'{clf_name}_{df_name}')
-    """
-    nn_tuning(df_list)
+    #nn_tuning(df_list)
 
 
 def nn_tuning(df_list):
@@ -179,4 +179,4 @@ def nn_tuning(df_list):
 
 
 
-#model_tuning()
+model_tuning()
