@@ -103,6 +103,7 @@ def feature_importance(X, y, forest, model_name):
     fig.tight_layout()
 
     best_features_series = forest_importances.sort_values(ascending=False)
+    print(best_features_series)
     filename = f'{settings.path_plots}/{model_name}_fimp'
     plt.savefig(filename, bbox_inches='tight')
     print(f'Saved fig into {filename}')
@@ -143,12 +144,9 @@ def foo():
 
     feature_elimination(model1.X, model1.y, nn1, f'nn_{model1.name}')
 
-    """
-    #for model in [model1, model2, model3]:
-    for model in [model2, model3]:
+    for model in [model1, model2, model3]:
         feature_elimination(model.X, model.y, model.rf, f'rf_{model.name}')
         feature_importance(model.X, model.y, model.rf, f'rf_{model.name}')
         feature_elimination(model.X, model.y, model.xgb, f'xgb_{model.name}')
-    """
 
 foo()
