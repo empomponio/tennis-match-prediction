@@ -1,2 +1,0 @@
-scoring,best_score,best_params,running_time
-accuracy,0.6690203250208187,"{'logisticregression__C': 0.01, 'logisticregression__max_iter': 1000, 'logisticregression__penalty': 'l2', 'logisticregression__solver': 'saga'}",663

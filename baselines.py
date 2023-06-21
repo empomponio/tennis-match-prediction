@@ -1,49 +1,42 @@
+import random
 import pandas as pd
+from sklearn.dummy import DummyClassifier
+from sklearn.metrics import classification_report
+
 import settings
 
 
-def winner_lowest_odds(df):
-    print('Baseline 1: winner is the player with the lowest odds')
-    correct = 0
-    returns = 0
-    # calculating correct predictions and profits
-    # winner with lower odds means prediction is correct
-    # same odds for both player means a random bet would be correct half of the time
-    # to calculate returns, assume an amount of 1 is bet on the lower odds every time
-    for i in range(len(df)):
-        if df.iloc[i].winner_odds < df.iloc[i].loser_odds:
-            correct += 1
-            returns += df.iloc[i].winner_odds - 1
-        elif df.iloc[i].winner_odds == df.iloc[i].loser_odds:
-            correct += 0.5
-            returns += (df.iloc[i].winner_odds / 2) - 1
-        else:
-            returns -= 1
-    accuracy = correct / len(df)
-    print(f'Accuracy: {accuracy}\nReturns: {returns} on {len(df)} bets\nAverage return per bet: {returns/len(df)}\n')
+def winner_higher_rank(X, y):
+    clf = DummyClassifier(strategy='most_frequent', random_state=0)
+    clf = clf.fit(X, y)
+    y_pred = clf.predict(X)
+    print(classification_report(y, y_pred, digits=4))
 
 
-def winner_highest_rank(df):
-    print('Baseline 2: winner is the highest ranked player')
-    correct = 0
-    returns = 0
-    # winner with lowest rank number (which means highest rank) means prediction is correct
-    # only two options in this case because two players cannot have the same rank
-    for i in range(len(df)):
-        if df.iloc[i].winner_rank < df.iloc[i].loser_rank:
-            correct += 1
-            returns += df.iloc[i].winner_odds - 1
-        else:
-            returns -= 1
-    accuracy = correct / len(df)
-    print(f'Accuracy: {accuracy}\nReturns: {returns} on {len(df)} bets\nAverage return per bet: {returns/len(df)}')
+def winner_lower_odds(X, y):
+    random.seed(settings.rnd_seed)
+    y_pred = []
+    for i in range(len(X)):
+        if X.loc[i, 'p0_odds'] <  X.loc[i, 'p1_odds']:
+            y_pred.append(0)
+        elif X.loc[i, 'p1_odds'] <  X.loc[i, 'p0_odds']:
+            y_pred.append(1)
+        else: # odds are equal: prediction is random
+            y_pred.append(random.randint(0, 1))
+    print(classification_report(y, y_pred, digits=4))
 
-def baselines():
-    # test on the csv for the last year
-    df = pd.read_csv(settings.data_original_csv)
-    df['tourney_date'] = pd.to_datetime(df['tourney_date'], format='%Y%m%d')  
-    df = df[df.tourney_date.dt.year == settings.end_year] # test set
-    winner_lowest_odds(df)
-    winner_highest_rank(df)
 
-baselines()
+def evaluate_baselines():
+    df = pd.read_csv(settings.data_baseline_test_csv)
+    y = df.pop('winner')
+    X = df
+    print('*********************************************************************')
+    print('Scores for baseline (winner is the higher-ranked player)')
+    print('*********************************************************************')
+    winner_higher_rank(X, y)
+    print('*********************************************************************')
+    print('Scores for challenger (winner is the player with lower odds)')
+    print('*********************************************************************')
+    winner_lower_odds(X, y)
+
+

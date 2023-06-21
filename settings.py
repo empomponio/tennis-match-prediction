@@ -1,3 +1,5 @@
+rnd_seed = 123
+
 path_original = 'data/original'
 path_yearly = f'{path_original}/yearly'
 data_original_csv = f'{path_original}/data_original.csv'                       # csv containing the full data from the selected years
@@ -20,8 +22,7 @@ data_symmetric_test_csv = f'{path_feature_files}/symmetric_test.csv'
 
 data_double_csv = f'{path_feature_files}/double.csv'
 data_double_test_csv = f'{path_feature_files}/double_test.csv'
-data_random_csv = f'{path_feature_files}/random.csv'
-data_random_test_csv = f'{path_feature_files}/random_test.csv'
+data_baseline_test_csv = f'{path_feature_files}/baseline_test.csv'
 
 
 

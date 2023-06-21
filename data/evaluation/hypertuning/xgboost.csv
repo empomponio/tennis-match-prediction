@@ -1,2 +1,0 @@
-scoring,best_score,best_params,running_time
-accuracy,0.6466347529931534,"{'reg_lambda': 0.1, 'reg_alpha': 2, 'n_estimators': 100, 'max_depth': 24, 'learning_rate': 0.1, 'gamma': 1, 'booster': 'dart'}",1429

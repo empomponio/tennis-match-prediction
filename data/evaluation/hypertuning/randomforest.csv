@@ -1,5 +1,0 @@
-scoring,fit_params,best_score,best_params,running_time
-f1,False,0.40611014060630807,"{'n_estimators': 100, 'min_samples_split': 10, 'max_features': None, 'max_depth': None, 'criterion': 'gini', 'bootstrap': False}",3384
-f1,True,0.4932956477022531,"{'n_estimators': 10, 'min_samples_split': 2, 'max_features': 'log2', 'max_depth': 3, 'criterion': 'gini', 'bootstrap': True}",6384
-"make_scorer(fbeta_score, beta=0.5)",False,0.4422138705245133,"{'n_estimators': 1000, 'min_samples_split': 10, 'max_features': 'log2', 'max_depth': None, 'criterion': 'gini', 'bootstrap': False}",3622
-"make_scorer(fbeta_score, beta=0.5)",True,0.46925066889407346,"{'n_estimators': 1000, 'min_samples_split': 5, 'max_features': 'sqrt', 'max_depth': 10, 'criterion': 'entropy', 'bootstrap': True}",12589

@@ -1,7 +1,0 @@
-scoring,fit_params,best_score,best_params,running_time
-precision,False,0.6159804567413263,"{'logisticregression__C': 1.8329807108324338e-05, 'logisticregression__penalty': 'l2', 'logisticregression__solver': 'lbfgs'}",78
-precision,True,0.5027104435906391,"{'logisticregression__C': 1.6237767391887209e-06, 'logisticregression__penalty': 'l2', 'logisticregression__solver': 'saga'}",75
-"make_scorer(precision_score, pos_label=0)",False,0.6878390495970106,"{'logisticregression__C': 0.2976351441631313, 'logisticregression__penalty': 'l2', 'logisticregression__solver': 'lbfgs'}",83
-"make_scorer(precision_score, pos_label=0)",True,0.7220971868877072,"{'logisticregression__C': 0.00020691380811147902, 'logisticregression__penalty': 'l2', 'logisticregression__solver': 'saga'}",96
-accuracy,False,0.6708218145262629,"{'logisticregression__C': 0.026366508987303555, 'logisticregression__penalty': 'l2', 'logisticregression__solver': 'lbfgs'}",77
-accuracy,True,0.6559185725056546,"{'logisticregression__C': 1e-10, 'logisticregression__penalty': 'l2', 'logisticregression__solver': 'lbfgs'}",88

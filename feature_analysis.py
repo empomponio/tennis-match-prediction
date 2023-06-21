@@ -50,8 +50,8 @@ def find_best_features_(X, y, clf, model_name):
     return rfecv.ranking_
 
 def feature_elimination_(X, y):
-    lr = LogisticRegression(random_state=123)
-    svc = LinearSVC(random_state=123, dual=False)
+    lr = LogisticRegression(random_state=settings.rnd_seed)
+    svc = LinearSVC(random_state=settings.rnd_seed, dual=False)
     models = {'Logistic Regression':lr, 'LinearSVC':svc}
 
     for name, model in models.items():
@@ -69,7 +69,7 @@ def feature_elimination_(X, y):
 def feature_importances(X, y):
     print('\nComputing feature importance with a Random Forest Classifier')
     feature_names = X.columns
-    forest = RandomForestClassifier(random_state=123)
+    forest = RandomForestClassifier(random_state=settings.rnd_seed)
     forest.fit(X, y)
     importances = forest.feature_importances_
     std = np.std([tree.feature_importances_ for tree in forest.estimators_], axis=0)
@@ -245,10 +245,10 @@ def feature_analysis():
     df1.drop(columns=['p0_odds', 'p1_odds'], inplace=True)
     df2 = pd.read_csv(settings.data_features2_csv)
 
-    lr1 = LogisticRegression(random_state=123, C=0.1, penalty='l2', solver='newton-cholesky')
-    lr2 = LogisticRegression(random_state=123, C=10, penalty='l2', solver='newton-cholesky')
-    rf1 = RandomForestClassifier(criterion='gini', max_features='log2', min_samples_split=5, n_estimators=1000, random_state=123)  
-    rf2 = RandomForestClassifier(criterion='entropy', max_features='sqrt', min_samples_split=10, n_estimators=1000, random_state=123)  
+    lr1 = LogisticRegression(random_state=settings.rnd_seed, C=0.1, penalty='l2', solver='newton-cholesky')
+    lr2 = LogisticRegression(random_state=settings.rnd_seed, C=10, penalty='l2', solver='newton-cholesky')
+    rf1 = RandomForestClassifier(criterion='gini', max_features='log2', min_samples_split=5, n_estimators=1000, random_state=settings.rnd_seed)  
+    rf2 = RandomForestClassifier(criterion='entropy', max_features='sqrt', min_samples_split=10, n_estimators=1000, random_state=settings.rnd_seed)  
 
     y1, X1 = df1.pop('winner'), df1
     y2, X2 = df2.pop('winner'), df2
@@ -269,8 +269,8 @@ def t_test():
     df2 = pd.read_csv(settings.data_features2_csv)
 
 
-    clf1 = RandomForestClassifier(criterion='gini', max_features='log2', min_samples_split=5, n_estimators=1000, random_state=123)  
-    clf2 = RandomForestClassifier(criterion='entropy', max_features='sqrt', min_samples_split=10, n_estimators=1000, random_state=123)  
+    clf1 = RandomForestClassifier(criterion='gini', max_features='log2', min_samples_split=5, n_estimators=1000, random_state=settings.rnd_seed)  
+    clf2 = RandomForestClassifier(criterion='entropy', max_features='sqrt', min_samples_split=10, n_estimators=1000, random_state=settings.rnd_seed)  
 
 
     y1, X1 = df1.pop('winner'), df1
@@ -293,7 +293,7 @@ def t_test_():
     df.drop(columns=['p0_odds', 'p1_odds'], inplace=True)
 
 
-    clf1 = XGBClassifier(subsample=1.0, reg_lambda=0.01, reg_alpha=0.01, n_estimators=200, max_depth=3, learning_rate=0.1, min_child_weight=5, colsample_bytree=1.0, random_state=123)
+    clf1 = XGBClassifier(subsample=1.0, reg_lambda=0.01, reg_alpha=0.01, n_estimators=200, max_depth=3, learning_rate=0.1, min_child_weight=5, colsample_bytree=1.0, random_state=settings.rnd_seed)
     clf2 = DummyClassifier(strategy='most_frequent', random_state=0)
 
     y, X = df.pop('winner'), df
@@ -304,11 +304,13 @@ def t_test_():
     print(scores1, '\n', scores2)
 
     t_stat, p_value = ttest_rel(scores1, scores2)
-    print("T-statistic value: ", t_stat)  
+    print("T-statistic value: ", t_stat)
     print("P-Value: ", p_value)
 
 
 t_test_()
-#feature_analysis()
 
-#create_files_best_features()
+
+def analyze_features():
+    #feature_analysis()
+    #create_files_best_features()

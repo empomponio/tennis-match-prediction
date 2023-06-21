@@ -1,3 +1,0 @@
-best_score,best_params,running_time
-0.672480695967408,"{'criterion': 'gini', 'max_features': 'log2', 'min_samples_split': 5, 'n_estimators': 1000}",7097
-0.6701502498242256,"{'criterion': 'entropy', 'max_features': 'sqrt', 'min_samples_split': 10, 'n_estimators': 1000}",15080

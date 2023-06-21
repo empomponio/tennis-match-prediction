@@ -1,4 +1,0 @@
-scoring,best_score,best_params,running_time
-precision,0.6426509927657776,"{'n_estimators': 100, 'min_samples_split': 5, 'max_features': 'sqrt', 'max_depth': 3, 'criterion': 'entropy', 'bootstrap': True}",930
-f1,0.44686476166937383,"{'n_estimators': 100, 'min_samples_split': 10, 'max_features': None, 'max_depth': None, 'criterion': 'entropy', 'bootstrap': True}",1254
-accuracy,0.696525517225904,"{'n_estimators': 10, 'min_samples_split': 10, 'max_features': None, 'max_depth': 10, 'criterion': 'entropy', 'bootstrap': True}",469

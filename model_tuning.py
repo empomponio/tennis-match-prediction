@@ -1,21 +1,12 @@
-from sklearn.ensemble import AdaBoostClassifier, HistGradientBoostingClassifier, RandomForestClassifier
-from sklearn.model_selection import GridSearchCV, RandomizedSearchCV, StratifiedKFold, train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV, StratifiedKFold
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, accuracy_score, make_scorer, precision_score, fbeta_score
-from sklearn.tree import DecisionTreeClassifier
 from xgboost import XGBClassifier
 from sklearn.preprocessing import  StandardScaler
 from sklearn.pipeline import make_pipeline
 
-import tensorflow as tf
 from sklearn.model_selection import GridSearchCV
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import Dropout
-from scikeras.wrappers import KerasClassifier
-
-from keras import models, layers
-from keras.metrics import Precision
+from sklearn.metrics import make_scorer, fbeta_score
 
 import pandas as pd
 import numpy as np
@@ -23,7 +14,7 @@ import time
 import math
 
 import settings
-from utils import get_x_y_w
+from neural_networks import nn_preprocessing, get_nn_grid
 
 
 
@@ -31,9 +22,9 @@ def hypertune_model(X, y, scoring_list, clf_name, search):
     results = []
     variables = ['scoring', 'best_score', 'best_params', 'running_time']
     for scoring in scoring_list:
-        print(f"""\n************************************************************************************
-            \nHypertuning {clf_name} for {scoring}\n\n************************************************************************************
-            """)
+        print('*****************************************************************************************************')    
+        print(f'Hypertuning {clf_name} for {scoring} on 5-fold cross validation')   
+        print('*****************************************************************************************************')       
         search.scoring = scoring
         start = time.time()
         search.fit(X, y)
@@ -50,11 +41,9 @@ def hypertune_model(X, y, scoring_list, clf_name, search):
 
 
 def ml_tuning():
-
-    #scoring_list = ['precision', 'f1', 'accuracy']
-    #scoring_list = ['f1']
-    scoring_list = [make_scorer(fbeta_score, beta=0.5)]
-
+    # hypertuning on accuracy only
+    # add more scores in the list to hypertune on other metrics
+    scoring_list = ['accuracy']
 
     df1 = pd.read_csv(settings.data_symmetric_csv)
     df2 = pd.read_csv(settings.data_double_csv)
@@ -64,8 +53,9 @@ def ml_tuning():
     # the test set is used with the best scoring models for more accurate metric evaluation and for cost evaluation
     n_jobs = -1
     cv = StratifiedKFold()
+    n_iter = 100
 
-    lr = make_pipeline(StandardScaler(), LogisticRegression(random_state=123))
+    lr = make_pipeline(StandardScaler(), LogisticRegression(random_state=settings.rnd_seed))
     lr_grid = [
         {
             'logisticregression__max_iter' : [100, 1000],
@@ -76,7 +66,7 @@ def ml_tuning():
     ]
     lr_search = GridSearchCV(lr, lr_grid, n_jobs=n_jobs, cv=cv)
 
-    rf =   RandomForestClassifier(random_state=123)
+    rf =   RandomForestClassifier(random_state=settings.rnd_seed)
     rf_grid = {
         'n_estimators' : [10, 100, 500],
         'max_depth': [None, 3, 10],
@@ -86,7 +76,7 @@ def ml_tuning():
     }
     rf_search = GridSearchCV(rf, rf_grid,  n_jobs=n_jobs, cv=cv)
 
-    xgb = XGBClassifier(random_state=123)
+    xgb = XGBClassifier(random_state=settings.rnd_seed)
 
     xgb_grid =  {
         'learning_rate':[0.3, 0.1, 0.6],
@@ -95,15 +85,14 @@ def ml_tuning():
         'booster' : ['gbtree', 'gblinear', 'dart'],  
         'gamma' : [0, 1, 10],   
         'reg_lambda' : [1, 0, 0.1],
-        'reg_alpha' : [0, 0.1, 1],
-        #'scale_pos_weight' : [10, 25, 50, 75, 99, 100, 1000]
+        'reg_alpha' : [0, 0.1, 1]
     }
-    xgb_search = RandomizedSearchCV(xgb, xgb_grid,  n_jobs=n_jobs, cv=cv, n_iter=100)
+    xgb_search = RandomizedSearchCV(xgb, xgb_grid,  n_jobs=n_jobs, cv=cv, n_iter=n_iter)
 
     clf_list = [
         (lr_search, 'logistic_regression'),
         (rf_search, 'random_forest'),
-        (xgb_search, 'xgboost_f1'),
+        (xgb_search, 'xgboost'),
     ]
 
     y1 = df1.pop('winner')
@@ -121,43 +110,6 @@ def ml_tuning():
                             scoring_list=scoring_list, 
                             search=clf_search, 
                             clf_name=f'{clf_name}_{df_name}')
-    #nn_tuning(df_list)
-
-
-
-def get_neuralnetwork_classifier(n_features):
-    tf.random.set_seed(123)
-
-    neurons = np.logspace(3, 10, num=8, base=2, dtype=int)
-    dropout_rates = np.linspace(0.1, 0.8, num=8)
-    learning_rates = np.logspace(-4, 1, 6)
-    batch_size = np.logspace(4, 12, num=9, base=2, dtype=int)
-    epochs = [5, 10, 50, 100]
-    
-    param_grid = dict(batch_size=batch_size, epochs=epochs, model__dropout_rate=dropout_rates, optimizer__learning_rate=learning_rates, model__neurons=neurons)
-    #print(param_grid)
-
-    def create_model(dropout_rate, neurons):
-        model = models.Sequential()
-        model.add(Dense(units=neurons, activation='relu', input_shape=(n_features,)))
-        model.add(layers.Dropout(dropout_rate))
-        model.add(layers.Dense(units=1, activation='sigmoid'))
-        model.compile(loss='binary_crossentropy', optimizer='adam')
-        return model
-
-    model = KerasClassifier(model=create_model, verbose=0)
-    return (model, param_grid)
-
-
-
-
-def nn_preprocessing(df, cat_col_names):
-  cat_cols = pd.get_dummies(data=df[cat_col_names], columns=cat_col_names)
-  df_ = df.copy()
-  df_.drop(cat_col_names, axis=1)
-  df_=(df_-df_.mean())/df_.std()
-  df_ = pd.concat([df_, cat_cols], axis=1)
-  return df_
 
 
 def nn_tuning():
@@ -178,20 +130,48 @@ def nn_tuning():
 
     n_jobs = -1
     cv = StratifiedKFold()
-    n_iter = 100
+    n_iter = 1
 
     for (X, y, df_name) in df_list:
         clf_name = 'neural_network'
         print('Tuning', clf_name)
-        (nn, nn_grid) = get_neuralnetwork_classifier(len(X.columns))
-        search = RandomizedSearchCV(nn, nn_grid,  n_jobs=n_jobs, cv=cv, n_iter=n_iter, random_state=123)
+        (nn, nn_grid) = get_nn_grid(len(X.columns))
+        search = RandomizedSearchCV(nn, nn_grid,  n_jobs=n_jobs, cv=cv, n_iter=n_iter, random_state=settings.rnd_seed)
         hypertune_model(X=X, y=y, 
                         scoring_list=['accuracy'],
                         search=search, 
                         clf_name=f'{clf_name}_{df_name}')
 
 
+def xgb_tuning_fscore():
+    scoring_list = [make_scorer(fbeta_score, beta=0.5)]
+    df = pd.read_csv(settings.data_symmetric_csv)
+    n_jobs = -1
+    cv = StratifiedKFold()
+    xgb = XGBClassifier(random_state=settings.rnd_seed)
+    n_iter = 100
+
+    # same parameter as the other search, with last row for weighting on class 1
+    xgb_grid =  {
+        'learning_rate':[0.3, 0.1, 0.6],
+        'n_estimators': [100, 200],
+        'max_depth' : [6, 2, 12],
+        'booster' : ['gbtree', 'gblinear', 'dart'],  
+        'gamma' : [0, 1, 10],   
+        'reg_lambda' : [1, 0, 0.1],
+        'reg_alpha' : [0, 0.1, 1],
+        'scale_pos_weight' : [10, 25, 50, 75, 99, 100, 1000]
+    }
+    xgb_search = RandomizedSearchCV(xgb, xgb_grid,  n_jobs=n_jobs, cv=cv, n_iter=n_iter)
+    y = df.pop('winner')
+    X = df
+    hypertune_model(X=X, y=y, scoring_list=scoring_list, search=xgb_search, clf_name='xgboost_f1_symmetric')
 
 
-#ml_tuning()
-nn_tuning()
+
+
+def hypertune_all():
+    #ml_tuning()
+    #nn_tuning()
+    xgb_tuning_fscore()
+

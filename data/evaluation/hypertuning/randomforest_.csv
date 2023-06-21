@@ -1,7 +1,0 @@
-scoring,fit_params,best_score,best_params,running_time
-precision,False,0.6576975415662636,"{'n_estimators': 100, 'min_samples_split': 10, 'max_features': 'log2', 'max_depth': 3, 'criterion': 'entropy', 'bootstrap': True}",2739
-precision,True,0.5499763177680557,"{'n_estimators': 1000, 'min_samples_split': 5, 'max_features': None, 'max_depth': None, 'criterion': 'entropy', 'bootstrap': True}",7751
-"make_scorer(precision_score, pos_label=0)",False,0.6958083481281385,"{'n_estimators': 100, 'min_samples_split': 10, 'max_features': None, 'max_depth': None, 'criterion': 'gini', 'bootstrap': True}",6630
-"make_scorer(precision_score, pos_label=0)",True,0.7330401775914782,"{'n_estimators': 1000, 'min_samples_split': 10, 'max_features': 'sqrt', 'max_depth': 3, 'criterion': 'entropy', 'bootstrap': True}",10920
-accuracy,False,0.6741224558250899,"{'n_estimators': 1000, 'min_samples_split': 10, 'max_features': 'log2', 'max_depth': 10, 'criterion': 'entropy', 'bootstrap': True}",8424
-accuracy,True,0.6709671348968486,"{'n_estimators': 1000, 'min_samples_split': 2, 'max_features': 'sqrt', 'max_depth': None, 'criterion': 'entropy', 'bootstrap': True}",5509

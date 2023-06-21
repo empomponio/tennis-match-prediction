@@ -1,5 +1,0 @@
-scoring,fit_params,best_score,best_params,running_time
-precision,<class 'NoneType'>,0.46045635634435256,"{'optimizer__learning_rate': 1.0, 'model__neurons': 32, 'model__dropout_rate': 0.5, 'epochs': 5, 'batch_size': 4096}",21
-precision,<class 'pandas.core.series.Series'>,0.496123063274046,"{'optimizer__learning_rate': 0.001, 'model__neurons': 64, 'model__dropout_rate': 0.7000000000000001, 'epochs': 50, 'batch_size': 4096}",48
-"make_scorer(precision_score, pos_label=0)",<class 'NoneType'>,0.6884838589629011,"{'optimizer__learning_rate': 1.0, 'model__neurons': 64, 'model__dropout_rate': 0.4, 'epochs': 50, 'batch_size': 4096}",14
-"make_scorer(precision_score, pos_label=0)",<class 'pandas.core.series.Series'>,0.6873185059257716,"{'optimizer__learning_rate': 0.001, 'model__neurons': 128, 'model__dropout_rate': 0.30000000000000004, 'epochs': 10, 'batch_size': 2048}",14

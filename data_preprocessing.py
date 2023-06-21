@@ -4,7 +4,6 @@ import pandas as pd
 import settings
 
 
-
 # helper function to get the initial dataframe from an excel file
 def get_df_from_excel(xl_name):
     xls = f'{xl_name}.xls'
@@ -80,6 +79,3 @@ def preprocess():
 
     df.to_csv(settings.data_original_csv)
     print(f'Saved data into {settings.data_original_csv}')
-
-
-preprocess()

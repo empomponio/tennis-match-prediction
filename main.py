@@ -1,31 +1,44 @@
-import data_preprocessing
-
-
-data_preprocessing.preprocess()import pandas as pd
-from google.colab import drive, files
-import zipfile
-import os
+import os, random
 import numpy as np
+import tensorflow as tf
+import settings
 
-from sklearn.model_selection import train_test_split, cross_val_score, cross_validate
-from sklearn.linear_model import LogisticRegression, SGDClassifier
-from sklearn.preprocessing import LabelEncoder, StandardScaler, OneHotEncoder
-from sklearn.pipeline import make_pipeline, Pipeline
-from sklearn.compose import ColumnTransformer
-from sklearn.svm import SVC, LinearSVC
-from sklearn.feature_selection import RFECV
-from sklearn.model_selection import StratifiedKFold
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.inspection import permutation_importance
-from sklearn.ensemble import ExtraTreesClassifier
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.ensemble import HistGradientBoostingClassifier
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.model_selection import GridSearchCV
+from data_preprocessing import preprocess
+from feature_extraction import extract_features
+from baselines import evaluate_baselines
+from model_tuning import hypertune_all
+#from feature_analysis import analyze_features
+from model_evaluation import evaluate_cv, evaluate_test
 
-from scipy.stats import spearmanr
-from scipy.cluster import hierarchy
-from scipy.spatial.distance import squareform
 
-import matplotlib.pyplot as plt
+
+def set_random_seeds():
+   os.environ['PYTHONHASHSEED']=str(settings.rnd_seed)
+   tf.random.set_seed(settings.rnd_seed)
+   np.random.seed(settings.rnd_seed)
+   random.seed(settings.rnd_seed)
+
+
+# 0. Fix seeds for reproducibility
+set_random_seeds()
+
+# 1. Merge original yearly dataset into a single file
+#preprocess()
+
+# 2. Create custom features and generate ML-ready feature files
+#extract_features()
+
+# 3. Evaluate baseline and challeger models
+#evaluate_baselines()
+
+# 4. Find the best hyperparameters on all ML models
+hypertune_all()
+
+# 5. Analyze features in tree-base models
+# analyze_features()
+
+# 6. Evaluate best models on cross-validation
+#evaluate_cv()
+
+# 7. Evaluate final model on test set 
+#evaluate_test()

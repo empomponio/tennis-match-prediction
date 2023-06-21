@@ -152,7 +152,8 @@ def make_features_csv():
 
     data = []
     # for each row in the original df:
-    for i in range(len(df)):
+    #for i in range(len(df)):
+    for i in range(10):
         row = []
         dp = df.loc[i]
 
@@ -334,20 +335,22 @@ def get_cat_features(dp):
 
 def create_train_test_csv(df, csv_path, csv_path_test):
     y = df.pop('winner')
-    df_train, df_test, y_train, y_test = train_test_split(df, y, test_size=0.33, stratify=y, random_state=123)
+    df_train, df_test, y_train, y_test = train_test_split(df, y, test_size=0.33, stratify=y, random_state=settings.rnd_seed)
     df_train['winner'] = y_train
     df_test['winner'] = y_test
 
     # save files
-    df_train.to_csv(csv_path, index=False)
-    print('Saved training/validation dataframe in path', csv_path)
+    if csv_path != '':
+        df_train.to_csv(csv_path, index=False)
+        print('Saved training/validation dataframe in path', csv_path)
     df_test.to_csv(csv_path_test, index=False)
     print('Saved test dataframe in path', csv_path_test)
 
-def sort_player_data(df, random_swap=False):
+def sort_player_data(df, cols=[]):
     print('***********************************************************************************\nSorting player data')
     # update names of columns to refer to player1 and player2 instead of winner and loser
-    cols = get_all_data_cols()
+    if cols == []:
+        cols = get_all_data_cols()
     updated_cols = ['p0'+col[1:] if col.startswith('w') else 'p1'+col[1:] for col in cols]
     updated_cols += ['tourney_date']
     p0_cols = [col for col in updated_cols if col.startswith('p0')]
@@ -356,13 +359,10 @@ def sort_player_data(df, random_swap=False):
     # add column for winner
     df['winner'] = 0
 
-    if not random_swap:
-        # df columns that will be swapped: player 1 has higher rank (lower rank number) than player 0
-        df_swapped = df[df.p0_rank > df.p1_rank]
-        print(f'Found {len(df_swapped)} out of {len(df)} columns where player with lower rank won the match. ({len(df_swapped)/len(df)}%)')
+    # df columns that will be swapped: player 1 has higher rank (lower rank number) than player 0
+    df_swapped = df[df.p0_rank > df.p1_rank]
+    print(f'Found {len(df_swapped)} out of {len(df)} columns where player with lower rank won the match. ({len(df_swapped)/len(df)}%)')
 
-    else:
-          df_swapped = df.sample(int(len(df)/2), random_state=123)
     # swap columns for player 0 and 1
     df_swapped[p0_cols+p1_cols] = df_swapped[p1_cols+p0_cols]
     # for these rows, the winner will be player 1
@@ -422,28 +422,27 @@ def create_csv_double(df):
     
     create_train_test_csv(df, settings.data_double_csv, settings.data_double_test_csv)
 
+# CSVs will contain only rank, odds and winner
+# only the test CSV is actually used in the project
+def create_csv_baseline():
+    df = pd.read_csv(settings.data_csv)
+    cols = ['w_rank', 'l_rank', 'w_odds', 'l_odds']
+    cols_ = cols + ['tourney_date']
+    df = df[cols_]
+    sort_player_data(df, cols=cols)
+    create_train_test_csv(df, '', settings.data_baseline_test_csv)
 
-def feature_selection():
-    # step 1: create initial csv containing augmented features
+
+def extract_features():
+    # 1. Create initial CSVs containing augmented features
     #make_features_csv()
 
-    # step 2: create csv containing numerical features only
+    # 2. Create CSVs containing numerical features only
     # features of both players will be merged
     df = pd.read_csv(settings.data_csv)
-    df2 = df.copy()
     sort_player_data(df)
     create_csv_symmetric(df)
     create_csv_double(df)
 
-    sort_player_data(df2, random_swap=True)
-    create_csv_symmetric(df2, csv_name='random')
-
-
-feature_selection()
-
-
-
-
-
-
-
+    # 3. Create CSVs for the challenger model
+    create_csv_baseline()

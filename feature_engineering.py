@@ -122,31 +122,55 @@ class OptimizedModel:
 def foo():
     # symmetric features, players ordered by rank
     df1 = pd.read_csv(settings.data_symmetric_csv)
-    rf1 = RandomForestClassifier(random_state=123, criterion='entropy', max_depth=10, max_features='log2', min_samples_split=2, n_estimators=500)
-    xgb1 = XGBClassifier(random_state=123, reg_lambda=1, reg_alpha=0.1, n_estimators=200, max_depth=2, learning_rate=0.1, gamma=0, booster='gbtree')
-    #nn1 = KerasClassifier(random_state=123, optimizer__learning_rate=0.001)
+    rf1 = RandomForestClassifier(random_state=settings.rnd_seed, criterion='entropy', max_depth=10, max_features='log2', min_samples_split=2, n_estimators=500)
+    xgb1 = XGBClassifier(random_state=settings.rnd_seed, reg_lambda=1, reg_alpha=0.1, n_estimators=200, max_depth=2, learning_rate=0.1, gamma=0, booster='gbtree')
+    #nn1 = KerasClassifier(random_state=settings.rnd_seed, optimizer__learning_rate=0.001)
     model1 = OptimizedModel(df1, rf1, xgb1, 'symmetric')
     nn1 = get_keras_nn(dropout_rate=0.3, neurons=512, n_features=len(model1.X.columns), learning_rate=0.01)
     KerasClassifier(model=nn1, epochs=50, batch_size=512)
     #{'optimizer__learning_rate': 0.01, 'model__neurons': 512, 'model__dropout_rate': 0.30000000000000004, 'epochs': 50, 'batch_size': 512}
     # double features, players ordered by rank
     df2 = pd.read_csv(settings.data_double_csv)
-    rf2 = RandomForestClassifier(random_state=123, criterion='gini', max_depth=None, max_features='log2', min_samples_split=10, n_estimators=500)
-    xgb2 = XGBClassifier(random_state=123, reg_lambda=0, reg_alpha=0, n_estimators=500, max_depth=2, learning_rate=0.1, gamma=1, booster='dart')
+    rf2 = RandomForestClassifier(random_state=settings.rnd_seed, criterion='gini', max_depth=None, max_features='log2', min_samples_split=10, n_estimators=500)
+    xgb2 = XGBClassifier(random_state=settings.rnd_seed, reg_lambda=0, reg_alpha=0, n_estimators=500, max_depth=2, learning_rate=0.1, gamma=1, booster='dart')
     model2 = OptimizedModel(df2, rf2, xgb2, 'double')
-    #{'optimizer__learning_rate': 1.0, 'model__neurons': 256, 'model__dropout_rate': 0.1, 'epochs': 50, 'batch_size': 32}
-    # symmetric features, players ordered randomly
-    df3 = pd.read_csv(settings.data_random_csv)
-    rf3 = RandomForestClassifier(random_state=123, criterion='gini', max_depth=10, max_features=None, min_samples_split=5, n_estimators=500)
-    xgb3 = XGBClassifier(random_state=123, reg_lambda=1, reg_alpha=1, n_estimators=200, max_depth=6, learning_rate=0.1, gamma=10, booster='gbtree')  
-    model3 = OptimizedModel(df3, rf3, xgb3, 'random')
-    #{'optimizer__learning_rate': 0.001, 'model__neurons': 128, 'model__dropout_rate': 0.5, 'epochs': 50, 'batch_size': 32}
 
     feature_elimination(model1.X, model1.y, nn1, f'nn_{model1.name}')
 
-    for model in [model1, model2, model3]:
+    for model in [model1, model2]:
         feature_elimination(model.X, model.y, model.rf, f'rf_{model.name}')
         feature_importance(model.X, model.y, model.rf, f'rf_{model.name}')
         feature_elimination(model.X, model.y, model.xgb, f'xgb_{model.name}')
-
 foo()
+
+
+
+def nn_tuning():
+    df1 = pd.read_csv(settings.data_symmetric_csv)
+    y1 = df1.pop('winner')
+    cat_sym = ['wildcard', 'hand_matchup']
+    df1 = nn_preprocessing(df1, cat_sym)
+
+    df2 = pd.read_csv(settings.data_double_csv)
+    y2 = df2.pop('winner')
+    cat_double = ['p0_hand', 'p1_hand']
+    df2 = nn_preprocessing(df2, cat_double)
+
+    df_list = [
+        (df1, y1, 'symmetric'),
+        (df2, y2, 'double')
+    ]
+
+    n_jobs = -1
+    cv = StratifiedKFold()
+    n_iter = 100
+
+    for (X, y, df_name) in df_list:
+        clf_name = 'neural_network'
+        print('Tuning', clf_name)
+        (nn, nn_grid) = get_neuralnetwork_classifier(len(X.columns))
+        search = RandomizedSearchCV(nn, nn_grid,  n_jobs=n_jobs, cv=cv, n_iter=n_iter, random_state=settings.rnd_seed)
+        hypertune_model(X=X, y=y, 
+                        scoring_list=['accuracy'],
+                        search=search, 
+                        clf_name=f'{clf_name}_{df_name}')
