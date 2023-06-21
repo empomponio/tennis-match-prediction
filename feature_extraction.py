@@ -435,7 +435,7 @@ def create_csv_baseline():
 
 def extract_features():
     # 1. Create initial CSVs containing augmented features
-    #make_features_csv()
+    make_features_csv()
 
     # 2. Create CSVs containing numerical features only
     # features of both players will be merged

@@ -1,2 +1,2 @@
 scoring,best_score,best_params,running_time
-accuracy,0.6494947915887525,{'n_estimators': 10},2
+accuracy,0.670397437431747,"{'criterion': 'gini', 'max_depth': None, 'max_features': 'log2', 'min_samples_split': 10, 'n_estimators': 500}",10201

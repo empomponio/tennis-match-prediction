@@ -55,7 +55,19 @@ def get_rf():
                                   max_features='log2', 
                                   min_samples_split=2, 
                                   n_estimators=500)
-    
+
+def get_xgb_fscore():
+    return XGBClassifier(random_state=settings.rnd_seed, 
+                        reg_lambda=0.1, 
+                        reg_alpha=1, 
+                        n_estimators=100, 
+                        max_depth=12, 
+                        learning_rate=0.1, 
+                        gamma=10,
+                        booster='dart',
+                        scale_pos_weight=10
+                        )
+
 
 def evaluate_cv():
     df = pd.read_csv(settings.data_symmetric_csv)
@@ -115,7 +127,6 @@ def evaluate_test():
 
 
 def evaluate_test_nn():
-
     df = pd.read_csv(settings.data_double_csv)
     y = df.pop('winner')
     cat_double = ['p0_hand', 'p1_hand']
@@ -133,7 +144,30 @@ def evaluate_test_nn():
     print('Evaluation on the test set')    
     print(classification_report(y_test, y_pred, digits=4))    
 
-def evaluate_test_fscore():
-    return
+def evaluate_xgb_fscore():
+    # Cross Validation
+    reset_scores()
+    xgb = get_xgb_fscore()
+    df = pd.read_csv(settings.data_symmetric_csv)
+    y = df.pop('winner')
+    X = df
+    print('*********************************************************************')
+    print('Evaluating XGBooster on a 10-fold cross validation')   
+    print('*********************************************************************')       
+    cross_val_score(xgb, X=X, y=y, scoring=make_scorer(classification_report_cv), cv=10)   
+    print(classification_report(y_true_cv, y_pred_cv, digits=4))
 
+    # Test set
+    print('*********************************************************************')
+    print('Fitting model to the training set...')  
+    xgb = get_xgb_fscore() 
+    xgb.fit(X=X, y=y)
+    df_test = pd.read_csv(settings.data_symmetric_test_csv)
+    y_test = df_test.pop('winner')
+    X_test = df_test
+    y_pred = xgb.predict(X=X_test)
+    print('*********************************************************************')
+    print('Evaluation on the test set')
+    print('*********************************************************************')
+    print(classification_report(y_test, y_pred, digits=4))  
 

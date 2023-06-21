@@ -171,7 +171,7 @@ def xgb_tuning_fscore():
 
 
 def hypertune_all():
-    #ml_tuning()
-    #nn_tuning()
+    ml_tuning()
+    nn_tuning()
     xgb_tuning_fscore()
 
