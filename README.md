@@ -1,2 +1,8 @@
-# tennis-match-prediction
- 
+# Tennis Match Prediction With Machine Learning: Engineering Features Without Using Betting Odds
+
+Project for the Machine Learning Exam for the academic year 2022-2023, University of Bari "Aldo Moro".
+The goal of the project is to compare several machine learning models to find the one that best predicts the outcome of a singles tennis match, and to do so without using betting odds. The project focuses on how different features and their representation can influence the outcome of a prediction.
+
+
+## Abstract from the project paper
+An XGBoost model with symmetric feature representation using 16 total features and not using betting odds is shown to predict the winner of singles tennis matches with a 67.43% accuracy on a test set of 13951 matches, a 1.92% improvement over a baseline predicting the higher-ranked player as the winner. Representing features symmetrically is shown to achieve approximately equal or slightly better performance across several Machine Learning models (Logistic Regression, Random Forest, XGBoost), whereas keeping features separate performs slightly better on Neural Network models; moreover, an original feature linking the attacking and defending abilities of the two opposing players is shown to have an importance superior to ranking in both XGBoost and Random Forest. Models without betting odds are ultimately unable to reach the accuracy of a challenger model which uses them (70.15%), although an XGBoost model appropriately tuned is shown to beat this model on both the F-score on class 1 (win of the lower-ranked player) by 11.39% and, more importantly, precision on class 0 (win of the higher-ranked player), by 7.39%, to a total 79.27%.
